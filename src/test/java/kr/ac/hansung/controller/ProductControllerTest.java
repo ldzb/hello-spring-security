@@ -53,9 +53,9 @@ class ProductControllerTest {
     @WithMockUser(roles = "USER")
     @DisplayName("인증된 사용자 - 상품 목록 조회 성공 (200)")
     void listProducts_authenticated_returns200() throws Exception {
-        given(productService.findAll()).willReturn(List.of(
-            new Product("Spring Boot 4 교재", 35000, "실습서", 50)
-        ));
+//        given(productService.findAll()).willReturn(List.of(
+//            new Product("Spring Boot 4 교재", 35000, "실습서", 50)
+//        ));
 
         mockMvc.perform(get("/products"))
             .andExpect(status().isOk())
