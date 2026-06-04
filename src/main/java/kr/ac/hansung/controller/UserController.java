@@ -29,14 +29,23 @@ public class UserController {
     @PostMapping("/user/password")
     public String changePassword(
             @AuthenticationPrincipal UserDetails userDetails,
-            @ModelAttribute("passwordChangeDto") PasswordChangeDto dto,
+            @Valid @ModelAttribute("passwordChangeDto") PasswordChangeDto dto,
+            BindingResult bindingResult,
             RedirectAttributes ra) {
 
+        if (bindingResult.hasErrors()) return "user/password";
+
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "mismatch",
+                "새 비밀번호가 일치하지 않습니다");
+            return "user/password";
+        }
         try {
             userService.changePassword(userDetails.getUsername(),
                 dto.getCurrentPassword(), dto.getNewPassword());
             ra.addFlashAttribute("successMessage", "비밀번호가 변경되었습니다");
         } catch (IllegalArgumentException e) {
+            bindingResult.rejectValue("currentPassword", "wrong", e.getMessage());
             return "user/password";
         }
         return "redirect:/home";
