@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <footer th:fragment="footer" class="container mt-5 mb-3 text-center text-muted border-top pt-3">
+        <p th:text="${'실습 수행 일시: ' + #temporals.format(#temporals.createNow(), 'yyyy년 MM월 dd일 (E) a hh:mm:ss') + '  │  학번: 2371046  │  성명: 김병철'}"></p>
+    </footer>
+</body>
+</html>
