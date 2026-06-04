@@ -3,13 +3,17 @@ package kr.ac.hansung.controller;
 import kr.ac.hansung.dto.ProductDto;
 import kr.ac.hansung.entity.Product;
 import kr.ac.hansung.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/products")
@@ -53,20 +57,60 @@ public class ProductController {
     }
 
     @GetMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public String addForm(Model model) {
         model.addAttribute("product", new ProductDto());
         return "products/add";
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public String save(@ModelAttribute ProductDto dto) {
         productService.save(dto);
         return "redirect:/products";
     }
 
     @PostMapping("/{id}/delete")
+    @PreAuthorize("hasRole('ADMIN')")
     public String delete(@PathVariable Long id) {
         productService.deleteById(id);
+        return "redirect:/products";
+    }
+
+    @GetMapping("/{id}/edit")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String editProductForm(@PathVariable Long id, Model model) {
+        Product product = productService.findById(id);
+
+        // 기존 데이터를 DTO에 담아 폼에 pre-fill
+        ProductDto dto = new ProductDto();
+        dto.setName(product.getName());
+        dto.setPrice(product.getPrice());
+        dto.setStock(product.getStock());
+        dto.setDescription(product.getDescription());
+
+        model.addAttribute("productDto", dto);
+        model.addAttribute("productId",  id);
+
+        return "products/edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String editProduct(@PathVariable Long id,
+            @Valid @ModelAttribute("productDto") ProductDto productDto,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes ra) {
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("productId", id);
+            return "products/edit";
+        }
+
+        productService.updateProduct(id, productDto);
+        ra.addFlashAttribute("successMessage", "상품이 수정되었습니다.");
+
         return "redirect:/products";
     }
 }

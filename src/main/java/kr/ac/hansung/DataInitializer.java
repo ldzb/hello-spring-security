@@ -41,6 +41,15 @@ public class DataInitializer implements ApplicationRunner {
             log.info("초기 관리자 계정 생성: admin@hansung.ac.kr / admin1234");
         }
 
+        if (!userRepository.existsByEmail("user@hansung.ac.kr")) {
+            User user = new User();
+            user.setEmail("user@hansung.ac.kr");
+            user.setPassword(passwordEncoder.encode("user1234"));
+            user.getRoles().add(userRole);
+            userRepository.save(user);
+            log.info("초기 일반 사용자 계정 생성: user@hansung.ac.kr / user1234");
+        }
+
         // DataInitializer.java  (ApplicationRunner 구현체)
 // 애플리케이션 시작 시 상품이 하나도 없으면 샘플 20건을 자동 생성
         if (productRepository.count() == 0) {
